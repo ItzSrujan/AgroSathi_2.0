@@ -75,20 +75,21 @@ const ImageUpload = () => {
 
 
   const handleSendToWhatsApp = async () => {
-    if (!phone.trim()) return alert("📱 Enter a valid WhatsApp number.");
-    if (!result.trim()) return alert("🧠 Analyze an image first.");
+  if (!phone.trim()) return alert("📱 Enter a valid WhatsApp number.");
+  if (!result.trim()) return alert("🧠 Analyze an image first.");
 
-    try {
-      await axios.post("http://localhost:5000/api/agri/image", {
-        phone,
-        language,
-      });
-      alert("✅ Message sent to WhatsApp!");
-    } catch (err) {
-      console.error(err);
-      alert("❌ Failed to send message.");
-    }
-  };
+  try {
+    await axios.post(`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/agri/send`, {
+      phone,
+      message: result,
+    });
+
+    alert("✅ Message sent to WhatsApp!");
+  } catch (err) {
+    console.error("❌ WhatsApp Send Error:", err.response?.data || err.message);
+    alert("❌ Failed to send message.");
+  }
+};
 
   const speakText = (text, langCode) => {
     const synth = window.speechSynthesis;

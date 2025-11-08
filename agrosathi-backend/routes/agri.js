@@ -12,13 +12,23 @@ const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TO
 // ✅ WhatsApp sender
 const sendWhatsApp = async (to, message) => {
   try {
-    const trimmed = message.length > 1597 ? message.slice(0, 1597) + "..." : message;
-    const response = await client.messages.create({
-      body: trimmed,
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: `whatsapp:${to}`,
-    });
-    console.log("✅ WhatsApp sent:", response.sid);
+    const chunkSize = 1200; // WhatsApp safe limit
+    const totalChunks = Math.ceil(message.length / chunkSize);
+
+    for (let i = 0; i < totalChunks; i++) {
+      const part = message.substring(i * chunkSize, (i + 1) * chunkSize);
+
+      await client.messages.create({
+        body: `(${i + 1}/${totalChunks})\n\n${part}`,
+        from: process.env.TWILIO_WHATSAPP_NUMBER,
+        to: `whatsapp:${to}`,
+      });
+
+      // Small delay to avoid Twilio rate-limit errors
+      await new Promise((res) => setTimeout(res, 1000));
+    }
+
+    console.log("✅ WhatsApp messages sent in chunks");
   } catch (error) {
     console.error("❌ WhatsApp error:", error.message);
   }
@@ -286,6 +296,22 @@ Day 7 -
   } catch (err) {
     console.error("❌ Advice Generation Error:", err.message);
     res.status(500).json({ error: "AI suggestion failed." });
+  }
+});
+
+router.post("/send", async (req, res) => {
+  const { phone, message } = req.body;
+
+  if (!phone || !message) {
+    return res.status(400).json({ error: "Phone and message are required." });
+  }
+
+  try {
+    await sendWhatsApp(phone, message);
+    res.json({ success: true, message: "WhatsApp message sent successfully" });
+  } catch (err) {
+    console.error("❌ WhatsApp Send Route Error:", err.message);
+    res.status(500).json({ error: "Failed to send WhatsApp message" });
   }
 });
 
