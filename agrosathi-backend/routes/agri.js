@@ -108,7 +108,7 @@ router.post("/image", upload.single("image"), async (req, res) => {
     const form = new FormData();
     form.append("image", imageBuffer, { filename: "plant.jpg" });
 
-    const flaskRes = await axios.post(`${process.env.MODEL_URL}/predict`, form, {
+    const flaskRes = await axios.post(`https://agrosath-ml-model-941746815745.asia-south1.run.app/predict`, form, {
       headers: form.getHeaders(),
     });
 
