@@ -107,7 +107,7 @@ router.post("/image", upload.single("image"), async (req, res) => {
     const form = new FormData();
     form.append("image", imageBuffer, { filename: "plant.jpg" });
 
-    const flaskRes = await axios.post("http://localhost:5000/predict", form, {
+    const flaskRes = await axios.post(`${process.env.MODEL_URL}/predict`, form, {
       headers: form.getHeaders(),
     });
 
