@@ -107,7 +107,7 @@ router.post("/image", upload.single("image"), async (req, res) => {
     const form = new FormData();
     form.append("image", imageBuffer, { filename: "plant.jpg" });
 
-    const flaskRes = await axios.post("http://127.0.0.1:5000/predict", form, {
+    const flaskRes = await axios.post("http://localhost:5000/predict", form, {
       headers: form.getHeaders(),
     });
 
@@ -124,9 +124,8 @@ router.post("/image", upload.single("image"), async (req, res) => {
   // ✅ NEW: Fetch City Name
   let city = "Unknown Area";
   try {
-    const locRes = await axios.post("http://localhost:5000/api/location/get-location", {
-      latitude,
-      longitude
+    const locRes = await axios.post(`${process.env.BACKEND_URL}/api/location/get-location`, {
+    latitude, longitude
     });
     city = locRes.data.location || city;
   } catch (err) {
@@ -136,10 +135,10 @@ router.post("/image", upload.single("image"), async (req, res) => {
   // ✅ NEW: Fetch Weather
  let temperature = "--°C";
 try {
-  const weatherRes = await axios.post("http://localhost:5000/api/weather/current", {
-    latitude,
-    longitude
-  });
+  const weatherRes = await axios.post(`${process.env.BACKEND_URL}/api/weather/current`, {
+  latitude, longitude
+});
+
 
   const temp =
     weatherRes.data?.currentConditions?.temperature ||
