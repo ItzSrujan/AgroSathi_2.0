@@ -109,8 +109,14 @@ router.post("/image", upload.single("image"), async (req, res) => {
     form.append("image", imageBuffer, { filename: "plant.jpg" });
 
     const flaskRes = await axios.post(`${process.env.MODEL_URL}/predict`, form, {
-      headers: form.getHeaders(),
-    });
+  headers: {
+    ...form.getHeaders(),
+    "Content-Type": `multipart/form-data; boundary=${form._boundary}`,
+  },
+  maxBodyLength: Infinity,
+  maxContentLength: Infinity,
+});
+
 
     console.log("🔍 Flask Result:", flaskRes.data);
 
