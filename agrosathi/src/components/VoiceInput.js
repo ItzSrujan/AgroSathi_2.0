@@ -166,6 +166,12 @@ const VoiceInput = () => {
             >
               🔊 Listen Again
             </button>
+            <button
+                onClick={() => window.speechSynthesis.cancel()}
+                className="glass-button"
+              >
+                ⛔ Stop Voice
+              </button>
           </>
         )}
       </div>
