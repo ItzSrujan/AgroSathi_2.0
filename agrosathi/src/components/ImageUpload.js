@@ -50,7 +50,7 @@ const ImageUpload = () => {
     formData.append("longitude", longitude);
 
     try {
-      const res = await axios.post('https://agrosath-ml-model-941746815745.asia-south1.run.app/api/agri/image', formData);
+      const res = await axios.post(`${backend}/api/agri/image`, formData);
 
       const { disease, suggestion, location, temperature } = res.data;
 
