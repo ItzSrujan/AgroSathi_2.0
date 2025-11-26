@@ -9,59 +9,59 @@ const LandingPage = () => {
   const [locationName, setLocationName] = useState("Fetching...");
   const [temperature, setTemperature] = useState("--°C");
 
- useEffect(() => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const latitude = pos.coords.latitude;
-        const longitude = pos.coords.longitude;
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const latitude = pos.coords.latitude;
+          const longitude = pos.coords.longitude;
 
-        fetchLocation(latitude, longitude);
-        fetchWeather(latitude, longitude);
-      },
-      () => {
-        setLocationName("Location Permission Denied");
-        setTemperature("--°C");
-      }
-    );
-  } else {
-    setLocationName("Geolocation Not Supported");
-  }
-}, []);
+          fetchLocation(latitude, longitude);
+          fetchWeather(latitude, longitude);
+        },
+        () => {
+          setLocationName("Location Permission Denied");
+          setTemperature("--°C");
+        }
+      );
+    } else {
+      setLocationName("Geolocation Not Supported");
+    }
+  }, []);
 
-const fetchLocation = async (latitude, longitude) => {
-  try {
-    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/location/get-location`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ latitude, longitude })
-    });
+  const fetchLocation = async (latitude, longitude) => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/location/get-location`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude, longitude })
+      });
 
-    const data = await res.json();
-    setLocationName(data.location || "Unknown City");
-  } catch {
-    setLocationName("Unknown City");
-  }
-};
+      const data = await res.json();
+      setLocationName(data.location || "Unknown City");
+    } catch {
+      setLocationName("Unknown City");
+    }
+  };
 
 
   const fetchWeather = async (latitude, longitude) => {
-  try {
-    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/weather/current`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ latitude, longitude })
-    });
+    try {
+      const res = await fetch(`http://localhost:8080/api/weather/current`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude, longitude })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.temperature) {
-      setTemperature(Math.round(data.temperature) + "°C");
+      if (data.temperature) {
+        setTemperature(Math.round(data.temperature) + "°C");
+      }
+    } catch {
+      setTemperature("--°C");
     }
-  } catch {
-    setTemperature("--°C");
-  }
-};
+  };
 
 
   return (

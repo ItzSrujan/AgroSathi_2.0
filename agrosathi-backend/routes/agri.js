@@ -105,37 +105,37 @@ router.post("/image", upload.single("image"), async (req, res) => {
 
   // ✅ MODEL PREDICTION (UNCHANGED)
   // MODEL PREDICTION
-try {
-  const form = new FormData();
-  form.append("image", imageBuffer, "plant.jpg");
+  try {
+    const form = new FormData();
+    form.append("image", imageBuffer, "plant.jpg");
 
-  const flaskRes = await axios.post(`${process.env.MODEL_URL}/predict`, form, {
-    headers: form.getHeaders(),
-    maxBodyLength: Infinity,
-    maxContentLength: Infinity,
-  });
-  let rawName = flaskRes.data.class_name || "Unknown";
+    const flaskRes = await axios.post(`http://localhost:5000/predict`, form, {
+      headers: form.getHeaders(),
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    });
+    let rawName = flaskRes.data.class_name || "Unknown";
 
-// ✅ Remove triple/extra underscores, replace with spaces, remove () characters
-  let cleanedName = rawName
-    .replace(/_/g, " ")       // Convert _ → space
-    .replace(/\s+/g, " ")     // Remove multiple spaces
-    .replace(/[()]/g, "")     // Remove brackets
-    .trim();
+    // ✅ Remove triple/extra underscores, replace with spaces, remove () characters
+    let cleanedName = rawName
+      .replace(/_/g, " ")       // Convert _ → space
+      .replace(/\s+/g, " ")     // Remove multiple spaces
+      .replace(/[()]/g, "")     // Remove brackets
+      .trim();
 
-  result.disease = cleanedName;
-  result.confidence = flaskRes.data.confidence;
+    result.disease = cleanedName;
+    result.confidence = flaskRes.data.confidence;
 
-} catch (err) {
-  console.error("❌ ML Prediction Error:", err.response?.data || err.message);
-  return res.status(500).json({ error: "Image prediction failed." });
-}
+  } catch (err) {
+    console.error("❌ ML Prediction Error:", err.response?.data || err.message);
+    return res.status(500).json({ error: "Image prediction failed." });
+  }
 
   // ✅ NEW: Fetch City Name
   let city = "Unknown Area";
   try {
-    const locRes = await axios.post(`${process.env.BACKEND_URL}/api/location/get-location`, {
-    latitude, longitude
+    const locRes = await axios.post(`http://localhost:8080/api/location/get-location`, {
+      latitude, longitude
     });
     city = locRes.data.location || city;
   } catch (err) {
@@ -143,31 +143,31 @@ try {
   }
 
   // ✅ NEW: Fetch Weather
- let temperature = "--°C";
-try {
-  const weatherRes = await axios.post(`${process.env.BACKEND_URL}/api/weather/current`, {
-  latitude, longitude
-});
+  let temperature = "--°C";
+  try {
+    const weatherRes = await axios.post(`http://localhost:8080/api/weather/current`, {
+      latitude, longitude
+    });
 
 
-  const temp =
-    weatherRes.data?.currentConditions?.temperature ||
-    weatherRes.data?.temperature ||
-    weatherRes.data?.temp ||
-    weatherRes.data?.days?.[0]?.temp ||
-    null;
+    const temp =
+      weatherRes.data?.currentConditions?.temperature ||
+      weatherRes.data?.temperature ||
+      weatherRes.data?.temp ||
+      weatherRes.data?.days?.[0]?.temp ||
+      null;
 
-  temperature = temp ? Math.round(temp) + "°C" : "--°C";
+    temperature = temp ? Math.round(temp) + "°C" : "--°C";
 
-} catch (err) {
-  console.log("❌ Weather Error:", err.message);
-}
+  } catch (err) {
+    console.log("❌ Weather Error:", err.message);
+  }
 
   console.log(`🌍 City: ${city}, 🌡 Temp: ${temperature}`);
 
   // ✅ UPDATED PROMPT (keeping your same structure)
   // 🌐 Prompt based on language (UPDATED)
-let prompt = `Location: ${city}
+  let prompt = `Location: ${city}
 Temperature: ${temperature}
 Disease: ${result.disease}
 
@@ -206,8 +206,8 @@ Make the explanation detailed but easy to understand.
 Do not shorten the response. Write full information.
 `;
 
-if (language === "hi") {
-  prompt = `स्थान: ${city}
+  if (language === "hi") {
+    prompt = `स्थान: ${city}
 तापमान: ${temperature}
 रोग: ${result.disease}
 
@@ -244,10 +244,10 @@ Day 7 -
 
 उत्तर पूरा लिखें, बीच में बंद न करें।
 `;
-}
+  }
 
-if (language === "mr") {
-  prompt = `ठिकाण: ${city}
+  if (language === "mr") {
+    prompt = `ठिकाण: ${city}
 तापमान: ${temperature}
 रोग: ${result.disease}
 
@@ -284,7 +284,7 @@ Day 7 -
 
 उत्तर पूर्ण लिहा, अर्धवट सोडू नका.
 `;
-}
+  }
 
   try {
     const aiAdvice = await generateAIAdvice(prompt);

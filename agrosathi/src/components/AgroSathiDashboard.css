@@ -1,0 +1,505 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #40ffaa;
+  --primary-dark: #2ecc71;
+  --secondary-color: #f59e0b;
+  --text-main: #ffffff;
+  --text-muted: #e2e8f0;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  --radius: 14px;
+}
+
+/* ---------- GLOBAL ---------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  background-color: #000;
+  height: 100vh;
+  overflow: hidden;
+  color: var(--text-main);
+}
+
+.agro-dashboard-root {
+  height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.agro-dashboard-root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 0;
+}
+
+/* ---------- HEADER ---------- */
+.agro-header {
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  padding: 0.8rem 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Header language button area */
+.header-actions {
+  display: flex;
+  align-items: center;
+  /* vertical centering */
+  gap: 18px;
+}
+
+/* Language button wrapper */
+.lang-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 22px;
+  /* increased width */
+  height: 46px;
+  /* increased height */
+  min-width: 140px;
+  /* increased width */
+
+  border-radius: 50px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+/* Hover effect */
+.lang-wrapper:hover {
+  background: rgba(0, 0, 0, 0.50);
+  border-color: rgba(64, 255, 170, 0.25);
+}
+
+/* Globe icon */
+.lang-icon {
+  font-size: 1.2rem;
+  /* increased icon size */
+  display: flex;
+  align-items: center;
+}
+
+/* ---------- DASHBOARD-ONLY language dropdown (scoped) ---------- */
+/* This overrides the global .glass-select only inside the header lang-wrapper */
+.agro-header .lang-wrapper .glass-select {
+  width: auto;
+  /* let wrapper decide width */
+  min-width: 120px;
+  max-width: 220px;
+  padding: 8px 14px;
+  /* compact padding for header */
+  border-radius: 999px;
+  /* pill shape */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.28);
+  /* dark translucent background */
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: center;
+  text-align-last: center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='12' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M0 0 L6 6 L12 0' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+
+/* hover / focus for header select only */
+.agro-header .lang-wrapper .glass-select:hover,
+.agro-header .lang-wrapper .glass-select:focus {
+  transform: translateY(-2px);
+  background: rgba(0, 0, 0, 0.42);
+  border-color: rgba(64, 255, 170, 0.16);
+  outline: none;
+}
+
+/* ensure options remain readable */
+.agro-header .lang-wrapper .glass-select option {
+  background: #111;
+  color: #fff;
+  text-align: left;
+}
+
+/* tighten wrapper so select sits centered */
+.agro-header .lang-wrapper {
+  padding: 6px 12px;
+  height: auto;
+  min-width: 0;
+}
+
+/* ---------- GRID ---------- */
+.agro-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  z-index: 1;
+}
+
+.agro-grid-3col {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.005));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- COLUMNS ---------- */
+.col-left,
+.col-center,
+.col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 0;
+}
+
+/* ---------- CARD BASE ---------- */
+.card {
+  background: var(--glass-bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card h2 {
+  font-size: 1rem;
+  color: var(--text-main);
+  margin: 0 0 0.8rem 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  flex-shrink: 0;
+}
+
+/* ---------- LEFT - QUICK ACTIONS (glassy buttons) ---------- */
+.nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.big-btn {
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  transition: transform .14s ease, box-shadow .14s ease, background .14s ease;
+}
+
+/* strong glass style for action buttons */
+.big-btn.glass-btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+}
+
+/* hover/active for upload/voice buttons */
+.big-btn.glass-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.55), 0 0 28px rgba(64, 255, 170, 0.03);
+  border-color: rgba(64, 255, 170, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+}
+
+/* small icon inside button */
+.big-btn .btn-icon {
+  font-size: 1.1rem;
+  margin-right: 8px;
+}
+
+/* ---------- WEATHER (improved visuals) ---------- */
+.info-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 12px;
+}
+
+.weather-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.weather-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.temp {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin: 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 6px 18px rgba(64, 255, 170, 0.06);
+}
+
+/* location row */
+.weather-loc {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* advice box: stronger glass with left accent */
+.advice-box {
+  background: linear-gradient(180deg, rgba(64, 255, 170, 0.04), rgba(64, 255, 170, 0.02));
+  border-left: 4px solid var(--primary-color);
+  padding: 12px;
+  border-radius: 10px;
+  color: #e9fff0;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  flex: 0 0 auto;
+  overflow: auto;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  max-height: 160px;
+}
+
+/* ---------- CENTER - CHAT ---------- */
+.chat-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+.chatbox {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.12));
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* message bubbles: glassy trimmed */
+.chat-msg {
+  padding: 10px 14px;
+  border-radius: 12px;
+  max-width: 85%;
+  font-size: 1.2rem;
+  line-height: 1.45;
+  word-break: break-word;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(6px);
+}
+
+/* user bubble: bright green glass */
+.chat-msg.user {
+  align-self: flex-end;
+  color: #fcfffe;
+  background: linear-gradient(180deg, rgba(64, 255, 170, 0.14), rgba(64, 255, 170, 0.06));
+  border: 1px solid rgba(64, 255, 170, 0.16);
+  box-shadow: 0 10px 28px rgba(64, 255, 170, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+/* bot bubble: softer glass */
+.chat-msg.bot {
+  align-self: flex-start;
+  color: var(--text-main);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.006));
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* controls + send button (glassy) */
+.chat-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chat-controls input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  outline: none;
+}
+
+/* send button glass */
+.chat-controls .send-btn {
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--primary-color);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.chat-controls .send-btn:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  border-color: rgba(64, 255, 170, 0.22);
+}
+
+/* ---------- RIGHT - MSP (table styling) ---------- */
+.msp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  height: 100%;
+  /* Fill full height of right column */
+  max-height: 100%;
+  /* Ensures it matches Chatbot height */
+}
+
+.msp-container {
+  flex: 1;
+  /* Expands properly */
+  overflow-y: auto;
+  /* Scroll inside */
+  border-radius: 10px;
+  padding: 6px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.01));
+}
+
+.msp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  min-width: 220px;
+}
+
+.msp-table thead th {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5));
+  color: var(--primary-color);
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.04);
+}
+
+.msp-table tbody td {
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: #d1eedd;
+}
+
+/* zebra rows and hover */
+.msp-table tbody tr:nth-child(odd) td {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.msp-table tbody tr:hover td {
+  background: rgba(64, 255, 170, 0.02);
+  color: #eafff0;
+}
+
+/* smaller responsive tweaks */
+@media (max-width: 1100px) {
+  .agro-grid-3col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .col-right {
+    display: none;
+  }
+
+  /* hide MSP on narrow widths */
+}
+
+@media (max-width: 700px) {
+  .agro-grid-3col {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .agro-header {
+    padding: 10px;
+  }
+}
+
+/* small utilities */
+.muted {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+}
+
+.footer {
+  margin-top: 8px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}

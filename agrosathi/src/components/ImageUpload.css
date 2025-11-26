@@ -1,10 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
 .module-container {
-  min-height: 100vh;
+  height: 100vh;
   background: black;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 2rem;
+  overflow-y: auto;
 }
 
 .glass-card {
@@ -28,10 +31,9 @@
   margin-bottom: 1.5rem;
 }
 
-.glass-input,
-.glass-select {
+.glass-input {
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
   padding: 12px 20px;
   margin: 10px 0;
   border-radius: 30px;
@@ -43,34 +45,68 @@
   font-size: 1rem;
 }
 
+/* ✅ UPDATED — Language dropdown styled like Choose Image button */
 .glass-select {
-  appearance: none;
+  width: 100%;
+  max-width: 320px;
+  padding: 12px;
+  /* Extra padding right for arrow */
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  /* Combined background to ensure both color and image show */
+  background: rgba(255, 255, 255, 0.05) url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 15px center;
+  background-size: 12px;
+
+  color: white;
   cursor: pointer;
-  margin-top: 0;
-  margin-bottom: 10px;
+  font-size: 1rem;
+  margin: 10px 0;
+  text-align: center;
+  text-align-last: center;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+
+  /* Remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.glass-select:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
 }
 
 .glass-select option {
   background: #1e1e1e;
   color: #fff;
+  text-align: left;
 }
 
 .file-upload-wrapper {
   position: relative;
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
   margin: 10px 0;
 }
 
-.file-upload-wrapper input[type="file"] {
-  font-size: 100px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-  cursor: pointer;
+/* New Button Group for Flex Layout */
+.button-group {
+  display: flex;
+  gap: 10px;
   width: 100%;
-  height: 100%;
+  max-width: 320px;
+  margin: 10px 0;
+  justify-content: center;
+}
+
+.button-group button {
+  flex: 1 1;
+  margin: 0 !important;
+  /* Override individual margins */
 }
 
 .glass-file-button {
@@ -86,11 +122,16 @@
   -webkit-backdrop-filter: blur(8px);
   font-size: 1rem;
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.glass-file-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
 }
 
 .glass-button {
-  width: 100%;
-  max-width: 300px;
+  width: 74%;
   background: rgba(64, 255, 170, 0.2);
   border: 1px solid rgba(64, 255, 170, 0.4);
   color: white;
@@ -108,17 +149,23 @@
   transform: translateY(-2px);
 }
 
+.glass-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .glass-response {
   background: rgba(255, 255, 255, 0.1);
   padding: 1rem;
   border-radius: 10px;
   text-align: left;
-  max-height: 300px;          /* Adjust this if needed */
-  overflow-y: auto;           /* Scroll if text is too long */
+  max-height: 300px;
+  overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.6;
-  font-family: 'Courier New', monospace;  /* Optional for <pre> look */
+  font-family: 'Courier New', monospace;
 }
 
 .preview-img {

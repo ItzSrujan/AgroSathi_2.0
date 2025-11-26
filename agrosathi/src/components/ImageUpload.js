@@ -1,116 +1,178 @@
-/* eslint-disable no-unused-vars */
+/* src/pages/ImageUpload.js */
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
 import "./ImageUpload.css";
-import translate from "translate";
+
+/*
+  Default preview is null initially.
+*/
+const DEFAULT_PREVIEW = null;
 
 const ImageUpload = () => {
   const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState("");
+  const [preview, setPreview] = useState(DEFAULT_PREVIEW);
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [phone, setPhone] = useState("+91XXXXXXXXXX");
   const [language, setLanguage] = useState("en");
   const [voices, setVoices] = useState([]);
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  const fileInputRef = useRef(null);
 
-  // ✅ Load available voices
+  // backend url (fallback to localhost if env not set)
+  const BACKEND = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+
+  /* ---------- voices ---------- */
   useEffect(() => {
     const loadVoices = () => {
       const synthVoices = window.speechSynthesis.getVoices();
-      if (synthVoices.length > 0) setVoices(synthVoices);
+      if (synthVoices.length > 0) {
+        setVoices(synthVoices);
+      }
     };
     loadVoices();
     window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
   }, []);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
-      setResult("");
-    }
+  /* ---------- preview cleanup when file changes ---------- */
+  useEffect(() => {
+    return () => {
+      // revoke object URL if component unmounts and we created one
+      if (preview && preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleChooseClick = () => {
+    fileInputRef.current?.click();
   };
 
-  const handleSubmit = async () => {
-  if (!image) return alert("📷 Please upload an image first.");
-  setLoading(true);
+  const handleImageChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
 
-  // ✅ Get GPS Coordinates
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    const latitude = pos.coords.latitude;
-    const longitude = pos.coords.longitude;
-
-    const formData = new FormData();
-    formData.append("image", image);
-    formData.append("phone", phone);
-    formData.append("language", language);
-    formData.append("latitude", latitude);
-    formData.append("longitude", longitude);
-
-    try {
-      const res = await axios.post(`${backend}/api/agri/image`, formData);
-
-      const { disease, suggestion, location, temperature } = res.data;
-
-      const finalResult =
-        `📍 स्थान: ${location}\n🌡 तापमान: ${temperature}\n\n` +
-        `🌿 रोग: ${disease.trim()}\n\n` +
-        `💡 सल्ला:\n${suggestion.trim()}`;
-
-      setResult(finalResult);
-      speakText(finalResult, language);
-
-    } catch (err) {
-      console.error(err);
-      setResult("❌ Failed to analyze image.");
-    } finally {
-      setLoading(false);
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file.");
+      return;
     }
-  },
-  () => {
-    alert("⚠️ Location access denied. Please enable GPS for weather-based advice.");
-    setLoading(false);
-  });
-};
 
+    // revoke previous blob URL if any
+    if (preview && preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
 
-  const handleSendToWhatsApp = async () => {
-  if (!phone.trim()) return alert("📱 Enter a valid WhatsApp number.");
-  if (!result.trim()) return alert("🧠 Analyze an image first.");
+    const url = URL.createObjectURL(file);
+    setImage(file);
+    setPreview(url);
+    setResult("");
+  };
 
-  try {
-    await axios.post(`${backend}/api/agri/send`, {
-      phone,
-      message: result,
+  const getCurrentPosition = (options = {}) =>
+    new Promise((resolve, reject) => {
+      if (!navigator.geolocation) return reject(new Error("Geolocation not supported"));
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
     });
 
-    alert("✅ Message sent to WhatsApp!");
-  } catch (err) {
-    console.error("❌ WhatsApp Send Error:", err.response?.data || err.message);
-    alert("❌ Failed to send message.");
-  }
-};
+  const isValidPhone = (p) => {
+    if (!p) return false;
+    // accept + and digits, 7-15 digits
+    return /^\+?\d{7,15}$/.test(p.trim());
+  };
 
   const speakText = (text, langCode) => {
     const synth = window.speechSynthesis;
+    if (!synth) return;
     synth.cancel();
 
     let selectedLang = langCode === "hi" ? "hi-IN" : langCode === "mr" ? "mr-IN" : "en-US";
     let selectedVoice = voices.find((v) => v.lang === selectedLang);
-
-    // 🛠️ Fallback
     if (!selectedVoice && langCode !== "en") {
-      console.warn("⚠️ No specific voice found. Falling back.");
+      // fallback to hi-IN or en-US
       selectedLang = "hi-IN";
-      selectedVoice = voices.find((v) => v.lang === selectedLang);
+      selectedVoice = voices.find((v) => v.lang === selectedLang) || voices.find((v) => v.lang.startsWith("en"));
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = selectedLang;
     if (selectedVoice) utterance.voice = selectedVoice;
     synth.speak(utterance);
+  };
+
+  const handleSubmit = async (e) => {
+    e?.preventDefault?.();
+    setResult("");
+    if (!image) {
+      alert("📷 Please upload an image first.");
+      return;
+    }
+    if (!isValidPhone(phone)) {
+      alert("📱 Enter a valid phone number (7-15 digits, optional leading +).");
+      return;
+    }
+
+    setLoading(true);
+
+    // Try to get GPS, but gracefully continue if user blocks it
+    let latitude = null;
+    let longitude = null;
+    try {
+      const pos = await getCurrentPosition({ enableHighAccuracy: true, timeout: 10000 });
+      latitude = pos.coords.latitude;
+      longitude = pos.coords.longitude;
+    } catch (err) {
+      // user denied or timed out; we proceed without coordinates
+      console.warn("Geolocation unavailable or denied:", err?.message || err);
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("image", image);
+      formData.append("phone", phone);
+      formData.append("language", language);
+      if (latitude !== null) formData.append("latitude", latitude);
+      if (longitude !== null) formData.append("longitude", longitude);
+
+      const res = await axios.post(`${BACKEND}/api/agri/image`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 120000,
+      });
+
+      // Expect backend to return { disease, suggestion, location, temperature } (best-effort)
+      const { disease, suggestion, location, temperature } = res.data || {};
+
+      const finalResult =
+        `${location ? `📍 स्थान: ${location}\n` : ""}${temperature ? `🌡 तापमान: ${temperature}\n\n` : ""}` +
+        `${disease ? `🌿 रोग: ${String(disease).trim()}\n\n` : ""}` +
+        `${suggestion ? `💡 सल्ला:\n${String(suggestion).trim()}` : "💡 कोई सल्ला उपलब्ध नहीं है।"}`;
+
+      setResult(finalResult);
+      // speak in selected language if available
+      speakText(finalResult, language);
+    } catch (err) {
+      console.error("Analyze error:", err);
+      const msg = err?.response?.data?.message || "❌ Failed to analyze image. Try again later.";
+      setResult(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendToWhatsApp = async () => {
+    if (!isValidPhone(phone)) return alert("📱 Enter a valid WhatsApp number.");
+    if (!result) return alert("🧠 Analyze an image first.");
+
+    try {
+      await axios.post(`${BACKEND}/api/agri/send`, {
+        phone,
+        message: result,
+      });
+      alert("✅ Message sent to WhatsApp!");
+    } catch (err) {
+      console.error("WhatsApp send error:", err?.response?.data || err?.message || err);
+      alert("❌ Failed to send message to WhatsApp.");
+    }
   };
 
   return (
@@ -123,67 +185,114 @@ const ImageUpload = () => {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="glass-card">
+      <div className="glass-card" role="region" aria-label="Upload crop image">
         <h2>📷 Upload Crop Image</h2>
 
         <select
+          className="glass-select"
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="glass-select"
+          aria-label="Language"
         >
           <option value="en">🇬🇧 English</option>
           <option value="hi">🇮🇳 Hindi</option>
-          <option value="mr">🇲🇷 Marathi</option>
+          <option value="mr">🇮🇳 Marathi</option>
         </select>
 
         <input
+          className="glass-input"
           type="text"
+          placeholder="+91XXXXXXXXXX"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="Enter WhatsApp number"
-          className="glass-input"
+          aria-label="WhatsApp phone number"
         />
 
-        <div className="file-upload-wrapper">
-          <button className="glass-file-button">📤 Choose Image</button>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
+        <div className="file-upload-wrapper" style={{ width: "100%", maxWidth: 360 }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ display: "none" }}
+            aria-hidden="true"
+          />
+          <div className="button-group">
+            <button
+              type="button"
+              className="glass-file-button"
+              onClick={handleChooseClick}
+              aria-label="Choose image"
+            >
+              📁 Choose Image
+            </button>
+
+            <button
+              type="button"
+              className="glass-button"
+              onClick={() => {
+                // clear selection
+                setImage(null);
+                if (preview && preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+                setPreview(DEFAULT_PREVIEW);
+                setResult("");
+                if (fileInputRef.current) fileInputRef.current.value = null;
+              }}
+            >
+              Clear
+            </button>
+          </div>
         </div>
 
         {preview && (
-          <img src={preview} alt="preview" className="preview-img" />
+          <img
+            src={preview}
+            alt="preview"
+            className="preview-img"
+            style={{ maxWidth: 360, marginTop: 14 }}
+          />
         )}
 
-        <button onClick={handleSubmit} className="glass-button">
-          Analyze
-        </button>
+        <div className="button-group">
+          <button
+            onClick={handleSubmit}
+            className="glass-button"
+            disabled={loading}
+            aria-busy={loading}
+          >
+            {loading ? "Analyzing..." : "Analyze"}
+          </button>
 
-        {loading && <p className="result-text">⏳ Analyzing...</p>}
+          <button onClick={handleSendToWhatsApp} className="glass-button" aria-label="Send to WhatsApp">
+            📩 Send to WhatsApp
+          </button>
+        </div>
+
+        {loading && <p className="result-text">⏳ Analyzing... please wait</p>}
 
         {result && (
           <>
-           <pre
-  className="glass-response"
-  style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", overflowY: "auto", maxHeight: "300px" }}
->
-  {result}
-</pre>
-
-            <button onClick={handleSendToWhatsApp} className="glass-button">
-              📩 Send to WhatsApp
-            </button>
-            <button
-              onClick={() => speakText(result, language)}
-              className="glass-button"
+            <pre
+              className="glass-response"
+              style={{
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                overflowY: "auto",
+                maxHeight: "300px",
+                marginTop: 14,
+              }}
             >
-              🔊 Listen Again
-            </button>
-              <button
-                onClick={() => window.speechSynthesis.cancel()}
-                className="glass-button"
-              >
+              {result}
+            </pre>
+
+            <div className="button-group">
+              <button onClick={() => speakText(result, language)} className="glass-button">
+                🔊 Listen Again
+              </button>
+              <button onClick={() => window.speechSynthesis.cancel()} className="glass-button">
                 ⛔ Stop Voice
               </button>
-
+            </div>
           </>
         )}
       </div>

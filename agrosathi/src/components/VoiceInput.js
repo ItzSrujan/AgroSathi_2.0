@@ -10,7 +10,7 @@ const VoiceInput = () => {
   const [phone, setPhone] = useState("+91XXXXXXXXXX");
   const [language, setLanguage] = useState("en");
   const [voices, setVoices] = useState([]);
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
   // ✅ Load system voices once
   useEffect(() => {
     const loadVoices = () => {
@@ -40,7 +40,7 @@ const VoiceInput = () => {
       try {
         console.log("🎤 Heard:", speechResult);
 
-        const res = await axios.post(`${backend}/api/agri/voice`, {
+        const res = await axios.post(`http://localhost:8080/api/agri/voice`, {
           query: speechResult,
           phone,
           language,
@@ -71,7 +71,7 @@ const VoiceInput = () => {
     if (!messageToSend.trim()) return alert("🎤 Please speak first.");
 
     try {
-      await axios.post(`${backend}/api/agri/send`, {
+      await axios.post(`http://localhost:8080/api/agri/send`, {
         phone,
         message: messageToSend,
       });
@@ -88,8 +88,8 @@ const VoiceInput = () => {
 
     let selectedLang =
       langCode === "hi" ? "hi-IN" :
-      langCode === "mr" ? "mr-IN" :
-      "en-US";
+        langCode === "mr" ? "mr-IN" :
+          "en-US";
 
     let selectedVoice = voices.find(v => v.lang === selectedLang);
 
@@ -167,11 +167,11 @@ const VoiceInput = () => {
               🔊 Listen Again
             </button>
             <button
-                onClick={() => window.speechSynthesis.cancel()}
-                className="glass-button"
-              >
-                ⛔ Stop Voice
-              </button>
+              onClick={() => window.speechSynthesis.cancel()}
+              className="glass-button"
+            >
+              ⛔ Stop Voice
+            </button>
           </>
         )}
       </div>

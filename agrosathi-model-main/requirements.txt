@@ -3,4 +3,5 @@ flask
 numpy
 pillow
 tensorflow==2.13.0
-tflite-runtime
+requests
+flask-cors
